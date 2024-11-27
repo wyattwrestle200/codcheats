@@ -1,15 +1,20 @@
 import cv2
 import numpy as np
 import mss
-import pygetwindow as gw
+import pyautogui
 import argparse
+import win32gui
 
 def get_game_window(window_name):
-    """Finds the game window with the given title."""
-    windows = gw.getWindowsWithTitle(window_name)
-    if len(windows) == 0:
+    """Finds the game window with the given title using pyautogui and win32gui."""
+    # Find the window handle by title
+    hwnd = win32gui.FindWindow(None, window_name)
+    if hwnd == 0:
         raise Exception(f"Window with title '{window_name}' not found!")
-    return windows[0]
+    
+    # Get the window's coordinates
+    rect = win32gui.GetWindowRect(hwnd)
+    return rect
 
 def detect_and_overlay(screen, model, conf_threshold, overlay_color, display_box):
     """Detects objects and overlays bounding boxes and labels."""
@@ -59,7 +64,7 @@ def main(args):
     overlay_color = tuple(map(int, args.color.split(',')))
     conf_threshold = args.confidence
 
-    # Get the game window
+    # Get the game window coordinates
     try:
         game_window = get_game_window(args.window_name)
     except Exception as e:
@@ -67,10 +72,10 @@ def main(args):
         return
 
     monitor = {
-        "top": game_window.top,
-        "left": game_window.left,
-        "width": game_window.width,
-        "height": game_window.height,
+        "top": game_window[1],
+        "left": game_window[0],
+        "width": game_window[2] - game_window[0],
+        "height": game_window[3] - game_window[1],
     }
 
     with mss.mss() as sct:
