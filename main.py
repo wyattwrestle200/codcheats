@@ -4,15 +4,22 @@ import mss
 import pygetwindow as gw
 import argparse
 
+def get_game_window(window_name):
+    """Finds the game window with the given title."""
+    windows = gw.getWindowsWithTitle(window_name)
+    if len(windows) == 0:
+        raise Exception(f"Window with title '{window_name}' not found!")
+    return windows[0]
+
 def detect_and_overlay(screen, model, conf_threshold, overlay_color, display_box):
-    # Convert the screen capture to a format OpenCV can use
+    """Detects objects and overlays bounding boxes and labels."""
     frame = np.array(screen)
     frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
 
     # Get image dimensions
     height, width = frame.shape[:2]
 
-    # Prepare blob for object detection
+    # Prepare the image for object detection
     blob = cv2.dnn.blobFromImage(frame, 1 / 255.0, (416, 416), swapRB=True, crop=False)
     model.setInput(blob)
 
@@ -52,11 +59,21 @@ def main(args):
     overlay_color = tuple(map(int, args.color.split(',')))
     conf_threshold = args.confidence
 
-    with mss.mss() as sct:
-        # Identify the window or screen to capture
-        game_window = gw.getWindowsWithTitle(args.window_name)[0]
-        monitor = {"top": game_window.top, "left": game_window.left, "width": game_window.width, "height": game_window.height}
+    # Get the game window
+    try:
+        game_window = get_game_window(args.window_name)
+    except Exception as e:
+        print(e)
+        return
 
+    monitor = {
+        "top": game_window.top,
+        "left": game_window.left,
+        "width": game_window.width,
+        "height": game_window.height,
+    }
+
+    with mss.mss() as sct:
         while True:
             # Capture the screen
             screen = sct.grab(monitor)
