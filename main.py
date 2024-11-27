@@ -81,5 +81,10 @@ if __name__ == "__main__":
     parser.add_argument("--window_name", type=str, default="Xbox Game Pass", help="Window title to capture")
     args = parser.parse_args()
 
-    main(args)
-    
+    # Prompt the user before running the script
+    start_script = input("Do you want to start the detection overlay? (y/n): ").strip().lower()
+    if start_script == 'y':
+        print("Starting detection overlay...")
+        main(args)
+    else:
+        print("Exiting. No detection overlay will run.")
