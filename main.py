@@ -3,18 +3,20 @@ import numpy as np
 import mss
 import pyautogui
 import argparse
-import win32gui
+import Quartz.CoreGraphics as CG
+import time
+
 
 def get_game_window(window_name):
-    """Finds the game window with the given title using pyautogui and win32gui."""
-    # Find the window handle by title
-    hwnd = win32gui.FindWindow(None, window_name)
-    if hwnd == 0:
-        raise Exception(f"Window with title '{window_name}' not found!")
-    
-    # Get the window's coordinates
-    rect = win32gui.GetWindowRect(hwnd)
-    return rect
+    """Finds the game window with the given title using Quartz."""
+    # This function retrieves all window information
+    windows = CG.CGEventCreate(None)
+    windows_list = []
+    # Add the logic to find the game window by title using Quartz API.
+    # Mac doesn't directly support finding windows by title like in Windows.
+    # Use tools like Accessibility API for deeper access to window info.
+    raise NotImplementedError("Window finding logic for macOS is not trivial. Use Accessibility API.")
+
 
 def detect_and_overlay(screen, model, conf_threshold, overlay_color, display_box):
     """Detects objects and overlays bounding boxes and labels."""
@@ -55,6 +57,7 @@ def detect_and_overlay(screen, model, conf_threshold, overlay_color, display_box
 
     return frame
 
+
 def main(args):
     # Load the pre-trained model (YOLO in this case)
     model = cv2.dnn.readNetFromDarknet(args.model_cfg, args.model_weights)
@@ -71,6 +74,7 @@ def main(args):
         print(e)
         return
 
+    # Assuming `game_window` gives a tuple of (left, top, width, height)
     monitor = {
         "top": game_window[1],
         "left": game_window[0],
@@ -92,6 +96,7 @@ def main(args):
                 break
 
     cv2.destroyAllWindows()
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Enemy Detection Overlay Script")
